@@ -74,4 +74,29 @@ pipeline {
       }
     }
   }
-}   
+}
+
+stage('Build Container Image') {
+      steps {
+        script {
+          try {
+            withMaven(maven: 'maven-3', globalMavenSettingsConfig: 'mss-mvn-global-settings', options: [ artifactsPublisher(disabled: true) ]) {
+              sh '''#!/bin/bash
+                  mvn package dockerfile:build -Ddocker.registry=$MSS_DOCKER_SERVER_PRD
+                  mvn dockerfile:tag@tag-version
+                  CURRENT_BRANCH=${GIT_BRANCH}
+                  if [[ "${GIT_BRANCH}" == "master" ]]; then
+                    mvn dockerfile:tag@tag-latest
+                  fi
+                '''
+              if (env.TAG_NAME ) {
+                sh  "mvn dockerfile:tag@tag-latest"
+              }
+            } 
+          } catch (exc) {
+              echo 'Tests failed'
+              currentBuild.result = 'FAILURE'
+          }   
+        }
+      }
+    }
