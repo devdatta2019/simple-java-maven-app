@@ -51,7 +51,7 @@ pipeline {
                             rtMavenRun(
                                 tool: "Maven 3.8.4", //id specified in Global Tool Configuration
                                 pom: 'pom.xml',
-                                goals: '-U -s $Settings_Maven clean compile',
+                                goals: '-U -s $Settings_Maven clean package',
                             )
                         }
                     }
